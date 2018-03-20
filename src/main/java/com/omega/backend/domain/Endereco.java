@@ -9,6 +9,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 public class Endereco implements Serializable {
 
@@ -17,10 +19,13 @@ public class Endereco implements Serializable {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer id;
-	private String morada;
+	private String logradouro;
+	private String numero;
 	private String complemento;
-	private String codPostal;
+	private String bairro;
+	private String cep;
 
+	@JsonBackReference
 	@ManyToOne
 	@JoinColumn(name = "cliente_id")
 	private Cliente cliente;
@@ -33,14 +38,17 @@ public class Endereco implements Serializable {
 
 	}
 
-	public Endereco(Integer id, String morada, String complemento, String codPostal, Cliente cliente, Cidade cidade) {
+	public Endereco(Integer id, String logradouro, String numero, String complemento, String bairro, String cep,
+			Cliente cliente, Cidade cidade) {
 		super();
 		this.id = id;
-		this.morada = morada;
+		this.logradouro = logradouro;
+		this.numero = numero;
 		this.complemento = complemento;
-		this.codPostal = codPostal;
+		this.bairro = bairro;
+		this.cep = cep;
 		this.cliente = cliente;
-		this.cidade = cidade;
+		this.setCidade(cidade);
 	}
 
 	public Integer getId() {
@@ -51,12 +59,20 @@ public class Endereco implements Serializable {
 		this.id = id;
 	}
 
-	public String getMorada() {
-		return morada;
+	public String getLogradouro() {
+		return logradouro;
 	}
 
-	public void setMorada(String morada) {
-		this.morada = morada;
+	public void setLogradouro(String logradouro) {
+		this.logradouro = logradouro;
+	}
+
+	public String getNumero() {
+		return numero;
+	}
+
+	public void setNumero(String numero) {
+		this.numero = numero;
 	}
 
 	public String getComplemento() {
@@ -67,12 +83,20 @@ public class Endereco implements Serializable {
 		this.complemento = complemento;
 	}
 
-	public String getCodPostal() {
-		return codPostal;
+	public String getBairro() {
+		return bairro;
 	}
 
-	public void setCodPostal(String codPostal) {
-		this.codPostal = codPostal;
+	public void setBairro(String bairro) {
+		this.bairro = bairro;
+	}
+
+	public String getCep() {
+		return cep;
+	}
+
+	public void setCep(String cep) {
+		this.cep = cep;
 	}
 
 	public Cliente getCliente() {
