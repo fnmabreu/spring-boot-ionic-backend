@@ -32,7 +32,7 @@ import com.omega.backend.repositories.PedidoRepository;
 import com.omega.backend.repositories.ProdutoRepository;
 
 @SpringBootApplication
-public class CursomcApplication implements CommandLineRunner {
+public class SpringIonicApplication implements CommandLineRunner {
 
 	@Autowired
 	private CategoriaRepository categoriaRepository;
@@ -62,7 +62,7 @@ public class CursomcApplication implements CommandLineRunner {
 	private ItemPedidoRepository itemPedidoRepository;
 
 	public static void main(String[] args) {
-		SpringApplication.run(CursomcApplication.class, args);
+		SpringApplication.run(SpringIonicApplication.class, args);
 	}
 
 	@Override

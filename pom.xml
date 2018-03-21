@@ -4,11 +4,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.omega.backend</groupId>
-	<artifactId>cursomc</artifactId>
+	<artifactId>spring-boot-ionic-backend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>cursomc</name>
+	<name>spring-boot-ionic-backend</name>
 	<description>Curso Spring Boot Ionic</description>
 
 	<parent>
