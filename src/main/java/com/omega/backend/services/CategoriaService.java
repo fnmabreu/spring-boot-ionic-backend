@@ -3,10 +3,12 @@ package com.omega.backend.services;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.omega.backend.domain.Categoria;
 import com.omega.backend.repositories.CategoriaRepository;
+import com.omega.backend.services.exception.DataIntegrityException;
 import com.omega.backend.services.exception.ObjectNotFoundException;
 
 @Service
@@ -31,5 +33,14 @@ public class CategoriaService {
 	public Categoria update(Categoria obj) {
 		find(obj.getId());
 		return repo.save(obj);
+	}
+
+	public void delete(Integer id) {
+		find(id);
+		try {
+			repo.deleteById(id);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityException("Não é possível eliminar uma categoria que possui produtos");
+		}
 	}
 }
