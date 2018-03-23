@@ -44,7 +44,7 @@ public class ClienteService {
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
 		repo.save(obj);
-		saveEnderecos(obj.getEnderecos());
+		saveEnderecos(obj);
 		return obj;
 	}
 
@@ -59,7 +59,7 @@ public class ClienteService {
 		try {
 			repo.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
-			throw new DataIntegrityException("Não é possível eliminar porque há entidades relacionadas");
+			throw new DataIntegrityException("Não é possível eliminar porque há pedidos relacionados");
 		}
 	}
 
@@ -111,9 +111,9 @@ public class ClienteService {
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cidade.class.getName()));
 	}
 
-	private void saveEnderecos(List<Endereco> endereco) {
-		if (endereco != null) {
-			enderecoRepo.saveAll(endereco);
+	private void saveEnderecos(Cliente obj) {
+		if (obj != null && obj.getEnderecos().size() > 0) {
+			enderecoRepo.saveAll(obj.getEnderecos());
 		}
 	}
 }
