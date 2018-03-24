@@ -21,7 +21,7 @@ public class URL {
 		return Arrays.asList(s.split(",")).stream().map(x -> Integer.parseInt(x)).collect(Collectors.toList());
 	}
 
-	// Alternativa
+
 	/*
 	public static List<Integer> decodeIntList(String s) {
 
