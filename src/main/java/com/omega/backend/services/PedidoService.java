@@ -5,16 +5,15 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.omega.backend.domain.ItemPedido;
 import com.omega.backend.domain.PagamentoComBoleto;
 import com.omega.backend.domain.Pedido;
 import com.omega.backend.domain.enums.EstadoPagamento;
-import com.omega.backend.repositories.ClienteRepository;
 import com.omega.backend.repositories.ItemPedidoRepository;
 import com.omega.backend.repositories.PagamentoRepository;
 import com.omega.backend.repositories.PedidoRepository;
-import com.omega.backend.repositories.ProdutoRepository;
 import com.omega.backend.services.exception.ObjectNotFoundException;
 
 @Service
@@ -30,13 +29,13 @@ public class PedidoService {
 	private PagamentoRepository pagamentoRepo;
 
 	@Autowired
-	private ProdutoRepository produtoRepo;
-
-	@Autowired
 	private ItemPedidoRepository itemPedidoRepo;
 
 	@Autowired
-	private ClienteRepository clienteRepo;
+	private ProdutoService produtoService;
+
+	@Autowired
+	private ClienteService clienteService;
 
 	@Autowired
 	private EmailService emailService;
@@ -49,11 +48,12 @@ public class PedidoService {
 
 	}
 
+	@Transactional
 	public Pedido insert(Pedido obj) {
 
 		obj.setId(null);
 		obj.setInstante(new Date());
-		obj.setCliente(clienteRepo.findById(obj.getCliente().getId()).orElse(null));
+		obj.setCliente(clienteService.find(obj.getCliente().getId()));
 		obj.getPagamento().setEstado(EstadoPagamento.PENDENTE);
 		obj.getPagamento().setPedido(obj);
 
@@ -62,23 +62,18 @@ public class PedidoService {
 			boletoService.preencherPagamentoComBoleto(pagto, obj.getInstante());
 		}
 
-		// Save do pedido
-		obj = repo.save(obj);
-
-		// Save do Pagamento
-		pagamentoRepo.save(obj.getPagamento());
+		obj = repo.save(obj); // Guarda o pedido
+		pagamentoRepo.save(obj.getPagamento()); // Guarda o pagamento
 
 		for (ItemPedido ip : obj.getItens()) {
 			ip.setDesconto(0.0);
-			ip.setProduto(produtoRepo.findById(ip.getProduto().getId()).orElse(null));
+			ip.setProduto(produtoService.find(ip.getProduto().getId()));
 			ip.setPreco(ip.getProduto().getPreco());
 			ip.setPedido(obj);
 		}
 
-		// Save dos Itens
-		itemPedidoRepo.saveAll(obj.getItens());
-
-		emailService.sendOrderConfirmationHtmlEmail(obj);
+		itemPedidoRepo.saveAll(obj.getItens()); // Guarda itens do pedido
+		emailService.sendOrderConfirmationHtmlEmail(obj); // Envia o pedido por email
 
 		return obj;
 	}

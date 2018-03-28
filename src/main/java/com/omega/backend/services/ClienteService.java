@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.omega.backend.domain.Cidade;
 import com.omega.backend.domain.Cliente;
@@ -17,7 +18,6 @@ import com.omega.backend.domain.Endereco;
 import com.omega.backend.domain.enums.TipoCliente;
 import com.omega.backend.dto.ClienteDTO;
 import com.omega.backend.dto.ClienteNewDTO;
-import com.omega.backend.repositories.CidadeRepository;
 import com.omega.backend.repositories.ClienteRepository;
 import com.omega.backend.repositories.EnderecoRepository;
 import com.omega.backend.services.exception.DataIntegrityException;
@@ -33,9 +33,6 @@ public class ClienteService {
 	private ClienteRepository clienteRepo;
 
 	@Autowired
-	private CidadeRepository cidadeRepo;
-
-	@Autowired
 	private EnderecoRepository enderecoRepo;
 
 	public Cliente find(Integer id) {
@@ -45,10 +42,11 @@ public class ClienteService {
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
 
+	@Transactional
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
 		clienteRepo.save(obj);
-		saveEnderecos(obj);
+		enderecoRepo.saveAll(obj.getEnderecos());
 		return obj;
 	}
 
@@ -85,7 +83,7 @@ public class ClienteService {
 		Cliente cli = new Cliente(null, objDto.getNome(), objDto.getEmail(), objDto.getCpfOuCnpj(),
 				TipoCliente.toEnum(objDto.getTipo()), passwordEncoder.encode(objDto.getSenha()));
 
-		Cidade cid = findCidadeById(objDto.getCidadeId());
+		Cidade cid = new Cidade(objDto.getCidadeId(), null, null);
 
 		Endereco end = new Endereco(null, objDto.getLogradouro(), objDto.getNumero(), objDto.getComplemento(),
 				objDto.getBairro(), objDto.getCep(), cli, cid);
@@ -107,17 +105,5 @@ public class ClienteService {
 	private void updateData(Cliente newObj, Cliente obj) {
 		newObj.setNome(obj.getNome());
 		newObj.setEmail(obj.getEmail());
-	}
-
-	private Cidade findCidadeById(Integer id) {
-		Optional<Cidade> cid = cidadeRepo.findById(id);
-		return cid.orElseThrow(() -> new ObjectNotFoundException(
-				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cidade.class.getName()));
-	}
-
-	private void saveEnderecos(Cliente obj) {
-		if (obj != null && obj.getEnderecos().size() > 0) {
-			enderecoRepo.saveAll(obj.getEnderecos());
-		}
 	}
 }

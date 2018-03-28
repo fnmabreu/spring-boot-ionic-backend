@@ -19,6 +19,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import com.omega.backend.security.JWTAuthenticationFilter;
+import com.omega.backend.security.JWTAuthorizationFilter;
 import com.omega.backend.security.JWTUtil;
 
 @Configuration
@@ -27,19 +28,25 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	private JWTUtil jwtUtil;
-	
+
 	@Autowired
 	private UserDetailsService userDetailsService;
 
 	@Autowired
 	private Environment env;
 
-	private static final String[] PUBLIC_MATCHERS = { "/h2-console/**" };
+	private static final String[] PUBLIC_MATCHERS = { 
+			"/h2-console/**" 
+	};
 
 	/**
 	 * Definiçao dos caminhos dos endpoints que vão estar acessiveis
 	 */
-	private static final String[] PUBLIC_MATCHERS_GET = { "/produtos/**", "/categorias/**", "/clientes/**" };
+	private static final String[] PUBLIC_MATCHERS_GET = { 
+			"/produtos/**", 
+			"/categorias/**", 
+			"/clientes/**" 
+	};
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
@@ -49,11 +56,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		}
 
 		http.cors().and().csrf().disable();
-		http.authorizeRequests()
-			.antMatchers(HttpMethod.GET, PUBLIC_MATCHERS_GET).permitAll()
-			.antMatchers(PUBLIC_MATCHERS).permitAll()
-			.anyRequest().authenticated();
+		http.authorizeRequests().antMatchers(HttpMethod.GET, PUBLIC_MATCHERS_GET).permitAll()
+				.antMatchers(PUBLIC_MATCHERS).permitAll().anyRequest().authenticated();
 		http.addFilter(new JWTAuthenticationFilter(authenticationManager(), jwtUtil));
+		http.addFilter(new JWTAuthorizationFilter(authenticationManager(), jwtUtil, userDetailsService));
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 
