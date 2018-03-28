@@ -15,11 +15,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.omega.backend.domain.Cidade;
 import com.omega.backend.domain.Cliente;
 import com.omega.backend.domain.Endereco;
+import com.omega.backend.domain.enums.Perfil;
 import com.omega.backend.domain.enums.TipoCliente;
 import com.omega.backend.dto.ClienteDTO;
 import com.omega.backend.dto.ClienteNewDTO;
 import com.omega.backend.repositories.ClienteRepository;
 import com.omega.backend.repositories.EnderecoRepository;
+import com.omega.backend.security.UserSS;
+import com.omega.backend.services.exception.AuthorizationException;
 import com.omega.backend.services.exception.DataIntegrityException;
 import com.omega.backend.services.exception.ObjectNotFoundException;
 
@@ -37,6 +40,11 @@ public class ClienteService {
 
 	public Cliente find(Integer id) {
 
+		UserSS user = UserService.authenticated();
+		if(user == null || !user.hasRole(Perfil.ADMIN) && !id.equals(user.getId())) {
+			throw new AuthorizationException("Acesso negado");
+		}
+		
 		Optional<Cliente> obj = clienteRepo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
