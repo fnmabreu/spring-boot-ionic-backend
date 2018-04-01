@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.omega.backend.domain.Cliente;
@@ -67,7 +68,6 @@ public class ClienteResource {
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	@RequestMapping(method = RequestMethod.GET)
 	public ResponseEntity<List<ClienteDTO>> findAll() {
-
 		List<Cliente> list = service.findAll();
 		List<ClienteDTO> listDto = list.stream().map(obj -> new ClienteDTO(obj)).collect(Collectors.toList());
 
@@ -85,5 +85,11 @@ public class ClienteResource {
 		Page<ClienteDTO> listDto = list.map(obj -> new ClienteDTO(obj));
 
 		return ResponseEntity.ok().body(listDto);
+	}
+
+	@RequestMapping(value = "/picture", method = RequestMethod.POST)
+	public ResponseEntity<Void> uploadProfilePicture(@RequestParam(value = "file") MultipartFile file) {
+		URI uri = service.uploadProfilePicture(file);
+		return ResponseEntity.created(uri).build();
 	}
 }
