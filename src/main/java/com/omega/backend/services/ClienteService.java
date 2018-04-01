@@ -35,7 +35,7 @@ public class ClienteService {
 	private BCryptPasswordEncoder passwordEncoder;
 
 	@Autowired
-	private ClienteRepository clienteRepo;
+	private ClienteRepository repo;
 
 	@Autowired
 	private EnderecoRepository enderecoRepo;
@@ -50,7 +50,7 @@ public class ClienteService {
 			throw new AuthorizationException("Acesso negado");
 		}
 
-		Optional<Cliente> obj = clienteRepo.findById(id);
+		Optional<Cliente> obj = repo.findById(id);
 		return obj.orElseThrow(() -> new ObjectNotFoundException(
 				"Objeto não encontrado! Id: " + id + ", Tipo: " + Cliente.class.getName()));
 	}
@@ -58,7 +58,7 @@ public class ClienteService {
 	@Transactional
 	public Cliente insert(Cliente obj) {
 		obj.setId(null);
-		clienteRepo.save(obj);
+		repo.save(obj);
 		enderecoRepo.saveAll(obj.getEnderecos());
 		return obj;
 	}
@@ -66,26 +66,26 @@ public class ClienteService {
 	public Cliente update(Cliente obj) {
 		Cliente newObj = find(obj.getId());
 		updateData(newObj, obj);
-		return clienteRepo.save(newObj);
+		return repo.save(newObj);
 	}
 
 	public void delete(Integer id) {
 		find(id);
 		try {
-			clienteRepo.deleteById(id);
+			repo.deleteById(id);
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityException("Não é possível eliminar porque há pedidos relacionados");
 		}
 	}
 
 	public List<Cliente> findAll() {
-		return clienteRepo.findAll();
+		return repo.findAll();
 	}
 
 	public Page<Cliente> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 
-		return clienteRepo.findAll(pageRequest);
+		return repo.findAll(pageRequest);
 	}
 
 	public Cliente fromDTO(ClienteDTO objDto) {
@@ -121,6 +121,18 @@ public class ClienteService {
 	}
 
 	public URI uploadProfilePicture(MultipartFile multipartFile) {
-		return s3Service.uploadFile(multipartFile);
+
+		UserSS user = UserService.authenticated();
+		if (user == null) {
+			throw new AuthorizationException("Acesso negado");
+		}
+
+		URI uri = s3Service.uploadFile(multipartFile);
+
+		Cliente cli = find(user.getId());
+		cli.setImageUrl(uri.toString());
+		repo.save(cli);
+
+		return uri;
 	}
 }
