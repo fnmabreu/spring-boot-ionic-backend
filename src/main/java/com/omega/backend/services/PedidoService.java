@@ -79,21 +79,22 @@ public class PedidoService {
 		}
 
 		itemPedidoRepo.saveAll(obj.getItens()); // Guarda itens do pedido
-		emailService.sendOrderConfirmationHtmlEmail(obj); // Envia o pedido por email
+		emailService.sendOrderConfirmationEmail(obj);
+		//emailService.sendOrderConfirmationHtmlEmail(obj); // Formato HTML
 
 		return obj;
 	}
-	
+
 	public Page<Pedido> findPage(Integer page, Integer linesPerPage, String orderBy, String direction) {
-		
+
 		UserSS user = UserService.authenticated();
-		if(user == null) {
+		if (user == null) {
 			throw new AuthorizationException("Acesso negado");
 		}
-		
+
 		PageRequest pageRequest = PageRequest.of(page, linesPerPage, Direction.valueOf(direction), orderBy);
 		Cliente cliente = clienteService.find(user.getId());
-		
+
 		return repo.findByCliente(cliente, pageRequest);
 	}
 

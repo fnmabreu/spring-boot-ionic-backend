@@ -84,7 +84,7 @@ public abstract class AbstractEmailService implements EmailService {
 
 		return mimeMessage;
 	}
-	
+
 	@Override
 	public void sendNewPasswordEmail(Cliente cliente, String newPass) {
 		SimpleMailMessage sm = prepareNewPasswordEmail(cliente, newPass);
